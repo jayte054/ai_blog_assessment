@@ -1,4 +1,4 @@
 export enum UserType{
     employee = "employee",
-    user = "user"
+    user = "user",
 }
