@@ -11,7 +11,7 @@ if (!dbConfig) {
 }
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
-    type: dbConfig.type,
+    type: dbConfig.type || "postgres",
     host: process.env.RDS_HOSTNAME || dbConfig.host,
     port: process.env.RDS_PORT || dbConfig.port,
     username: process.env.RDS_USERNAME || dbConfig.username,
