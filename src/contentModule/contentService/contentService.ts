@@ -40,6 +40,6 @@ export class ContentService {
     id: string,
     user: AuthEntity
   ): Promise<ContentObject | string> {
-    return await this.contentRepository.deleteContent(id, user)
+    return await this.contentRepository.deleteContent(id, user);
   }
 }
