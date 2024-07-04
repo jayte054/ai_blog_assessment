@@ -235,7 +235,7 @@ export class ContentRepository extends Repository<
         content.isApproved = false;
         await content.save();
         this.logger.log(`request to delete content has been submitted`);
-      }
+      } 
 
       return `content with id ${id}, ${content.name} has been deleted`;
     } catch (error) {
