@@ -23,5 +23,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
         ApprovedContentEntity,
     ],
     synchronize: process.env.TypeORM_SYNC || dbConfig.synchronize,
-    // migrations: ["dist/migations/*.js"]
+    migrations: ["dist/migations/*.js"]
 }
