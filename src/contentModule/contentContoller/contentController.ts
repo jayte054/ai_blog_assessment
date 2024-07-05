@@ -26,7 +26,6 @@ export class ContentController {
     @Body() createContentDto: CreateContentDto,
     @GetUser() user: AuthEntity,
   ): Promise<ContentObject> {
-    console.log(user, createContentDto);
     return await this.contentService.createContent(createContentDto, user);
   }
 

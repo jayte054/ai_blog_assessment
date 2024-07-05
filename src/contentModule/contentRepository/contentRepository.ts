@@ -21,7 +21,6 @@ export class ContentRepository extends Repository<
     createContentDto: CreateContentDto,
     user: AuthEntity,
   ): Promise<ContentObject> {
-    console.log(user);
     if (!user) {
       throw new UnauthorizedException('uunauthorized');
     }
