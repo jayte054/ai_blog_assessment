@@ -19,6 +19,16 @@ export class AuthController {
     return await this.authService.signup(authCredentialsDto);
   }
 
+  @ApiOperation({ summary: 'Register the Admin' })
+  @ApiResponse({ status: 201, description: 'admin created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('/adminSignup')
+  async adminSignUp(
+    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
+  ): Promise<string> {
+    return await this.authService.adminSignup(authCredentialsDto);
+  }
+
   @ApiOperation({ summary: 'Authenicate the user' })
   @ApiResponse({ status: 201, description: `{accessToken:"", user:{}}` })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

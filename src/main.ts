@@ -10,7 +10,7 @@ async function bootstrap() {
 
   const options = new DocumentBuilder()
   .setTitle("blog assessment")
-  .setDescription(" a blog api dsigned to manage content display with authorization")
+  .setDescription(" a blog api designed to manage content display with authorization")
   .setVersion("1.0")
   .build()
 
