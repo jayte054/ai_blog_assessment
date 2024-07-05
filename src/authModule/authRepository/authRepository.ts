@@ -44,7 +44,6 @@ export class AuthRepository extends Repository<AuthEntity> {
       if (error.code === '23505') {
         throw new ConflictException('email already exists');
       } else {
-        console.log(error);
         this.logger.error('error creating user');
         throw new InternalServerErrorException('error creating user');
       }

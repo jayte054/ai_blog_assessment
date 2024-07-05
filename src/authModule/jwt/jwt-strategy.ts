@@ -46,8 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ])
 
         if(!user) {
-            console.log("user not authroi=")
-            throw new UnauthorizedException("uuuunauthorized")
+            throw new UnauthorizedException("unauthorized")
         } else {
             return user
         }

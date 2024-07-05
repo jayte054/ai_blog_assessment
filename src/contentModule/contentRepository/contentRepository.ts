@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AuthEntity } from "src/authModule/authEntity/authEntity";
 import { ContentObject } from "src/types";
-import { DataSource, FindManyOptions, FindOneOptions,  Repository } from "typeorm";
+import { DataSource, FindManyOptions, FindOneOptions,  FindOptions,  Repository } from "typeorm";
 import { CreateContentDto, UpdateContentDto } from "../contentDto/contentDto";
 import { ApprovedContentEntity } from "../contentEntity/approvedContentEntity";
 import { ContentEntity } from "../contentEntity/contentEntity";
@@ -22,7 +22,7 @@ export class ContentRepository extends Repository<
     user: AuthEntity,
   ): Promise<ContentObject> {
     if (!user) {
-      throw new UnauthorizedException('uunauthorized');
+      throw new UnauthorizedException('unauthorized');
     }
 
     const { title, description } = createContentDto;
@@ -32,7 +32,7 @@ export class ContentRepository extends Repository<
       const newContent = new ContentEntity();
       newContent.title = title;
       newContent.description = description;
-      newContent.isApproved = userType !== 'employee' ? false : true;
+      newContent.isApproved = userType === 'employee' ;
       newContent.userId = id;
       newContent.user = user;
       newContent.name = name;
@@ -80,7 +80,7 @@ export class ContentRepository extends Repository<
   //======get contents========//
 
   async getContents(): Promise<ApprovedContentEntity[]> {
-    const options: FindOneOptions<ApprovedContentEntity> = {
+    const options: FindManyOptions<ApprovedContentEntity> = {
       where: {
         isApproved: true,
       },
@@ -107,13 +107,13 @@ export class ContentRepository extends Repository<
           isApproved: true,
         },
       };
-      const content = await this.find(option);
+      const content = await this.findOne(option);
 
       if (!content) {
         throw new NotFoundException(`order with id ${id} not found`);
       } else {
         this.logger.verbose(`user successfully fetched content with id ${id}`);
-        return content[0];
+        return content;
       }
     } catch (error) {
       this.logger.error(`error fetching content with id: ${id}`);
@@ -134,7 +134,7 @@ export class ContentRepository extends Repository<
           isApproved: true,
         },
       };
-      const content = await this.find(option);
+      const content = await this.findOne(option);
 
       if (!content) {
         throw new NotFoundException(`order with id ${id} not found`);
@@ -142,7 +142,7 @@ export class ContentRepository extends Repository<
         this.logger.verbose(
           `user ${user.name} successfully fetched content with id ${id}`,
         );
-        return content[0];
+        return content;
       }
     } catch (error) {
       this.logger.error(`error fetching content with id: ${id}`);
@@ -157,24 +157,26 @@ export class ContentRepository extends Repository<
     user: AuthEntity,
     updateContentDto: UpdateContentDto,
   ): Promise<ContentObject> {
-    const { title, description } = updateContentDto;
+    const {  description } = updateContentDto;
     const { isAdmin, userType, name } = user;
-
+    
     try {
       const updatedContent = await this.getContentUser(id, user);
+      if(name !== updatedContent.name) {
+        this.logger.error("you are not authorized to update this content")
+        throw new UnauthorizedException("you are not authorized to update this content")
+      }
       const _approvedContent = await ApprovedContentEntity.findOneBy({
         title: updatedContent.title,
       });
 
-      updatedContent.title = title;
       updatedContent.description = description;
 
-      console.log(updatedContent);
 
       if (userType === 'user') {
         updatedContent.isApproved = false;
         await updatedContent.save();
-        this.logger.verbose(`updated content has been submitted for approval`);
+        this.logger.verbose(`updated content has been submitted for approval `);
       } else if (userType === 'employee') {
         await updatedContent.save();
         this.logger.verbose(`updated content has been updated`);
@@ -199,7 +201,8 @@ export class ContentRepository extends Repository<
         name: updatedContent.name,
       };
     } catch (error) {
-      throw new InternalServerErrorException('error updating content');
+        this.logger.error( `error updating content`, error)
+      throw new InternalServerErrorException('error updating content', error);
     }
   }
 
@@ -232,12 +235,152 @@ export class ContentRepository extends Repository<
         content.isApproved = false;
         await content.save();
         this.logger.log(`request to delete content has been submitted`);
-      } 
+      }
 
       return `content with id ${id}, ${content.name} has been deleted`;
     } catch (error) {
       this.logger.error(`error deleting content with id: ${id}`, error.stack);
       throw new InternalServerErrorException('failed to delete content');
+    }
+  }
+
+  async approveContent(id: string, user: AuthEntity): Promise<ContentObject> {
+    const { isAdmin } = user;
+    if (!isAdmin) {
+      throw new UnauthorizedException(
+        'You do not have permission to approve content',
+      );
+    }
+
+    try {
+      const option: FindManyOptions<ContentEntity> = {
+        where: {
+          id,
+        },
+      };
+      const content = await this.findOne(option);
+
+      if (!content) {
+        throw new NotFoundException('Content not found');
+      }
+
+      content.isApproved = true;
+      await content.save();
+
+      const approvedContent = await ApprovedContentEntity.findOneBy({
+        title: content.title,
+      });
+
+      if (approvedContent) {
+        approvedContent.title = content.title;
+        approvedContent.description = content.description;
+        approvedContent.date = content.date;
+        await approvedContent.save();
+      } else {
+        const newApprovedContent = ApprovedContentEntity.create(content);
+        await newApprovedContent.save();
+      }
+
+      this.logger.log(`Content approved successfully by, ${user.name}`);
+      return {
+        id: content.id,
+        title: content.title,
+        description: content.description,
+        name: content.name,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error approving content');
+    }
+  }
+
+  async approveUpdateByAdmin(
+    id: string,
+    user: AuthEntity,
+  ): Promise<ContentObject> {
+    const { isAdmin } = user;
+    if (!isAdmin) {
+      throw new UnauthorizedException(
+        'You do not have permission to update content',
+      );
+    }
+
+    try {
+      const option: FindManyOptions<ContentEntity> = {
+        where: {
+          id,
+        },
+      };
+      const content = await this.findOne(option);
+
+      if (!content) {
+        throw new NotFoundException('Content not found');
+      }
+
+      content.isApproved = true;
+
+      await content.save();
+
+      const approvedContent = await ApprovedContentEntity.findOneBy({
+        title: content.title,
+      });
+
+      if (approvedContent) {
+        approvedContent.title = content.title;
+        approvedContent.description = content.description;
+        approvedContent.date = content.date;
+        await approvedContent.save();
+      }
+
+      this.logger.log(`Content updated successfully by, ${user.name}`);
+      return {
+        id: content.id,
+        title: content.title,
+        description: content.description,
+        name: content.name,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error updating content');
+    }
+  }
+
+  async approveContentDelete(
+    id: string,
+    user: AuthEntity,
+  ): Promise<ContentObject | string> {
+    const { isAdmin, name } = user;
+    if (!isAdmin) {
+      throw new UnauthorizedException(
+        'You do not have permission to delete content',
+      );
+    }
+
+    try {
+      const option: FindManyOptions<ContentEntity> = {
+        where: {
+          id,
+        },
+      };
+      const content = await this.findOne(option);
+        if(content.isApproved = false){
+            await ContentEntity.delete({
+                id: content.id
+            })
+             this.logger.log(`Content deleted successfully by, ${name}`);
+        }
+
+
+      const approvedContent = await ApprovedContentEntity.findOneBy({
+         id,
+      });
+      if (approvedContent) {
+         await ApprovedContentEntity.delete({ id });
+      }
+
+      this.logger.log(`Content deleted successfully by, ${name}`);
+      return `content with id ${id}, ${content.name} has been deleted`;
+    } catch (error) {
+        this.logger.error("failed to delete content with id;", id)
+      throw new InternalServerErrorException('Error deleting content');
     }
   }
 }

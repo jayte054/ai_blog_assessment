@@ -8,7 +8,6 @@ export class CreateContentDto {
 }
 
 export class UpdateContentDto {
-    title: string;
     description: string;
     isApproved: boolean;
 }

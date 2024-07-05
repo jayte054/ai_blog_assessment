@@ -31,15 +31,37 @@ export class ContentService {
   async updateContent(
     id: string,
     user: AuthEntity,
-    updateContentDto: UpdateContentDto
+    updateContentDto: UpdateContentDto,
   ): Promise<ContentObject> {
-    return await this.contentRepository.updateContent(id, user, updateContentDto);
+    return await this.contentRepository.updateContent(
+      id,
+      user,
+      updateContentDto,
+    );
   }
 
   async deleteContent(
     id: string,
-    user: AuthEntity
+    user: AuthEntity,
   ): Promise<ContentObject | string> {
     return await this.contentRepository.deleteContent(id, user);
+  }
+
+  async approveContent(id: string, user: AuthEntity): Promise<ContentObject> {
+    return await this.contentRepository.approveContent(id, user);
+  }
+
+  async approveUpdateByAdmin(
+    id: string,
+    user: AuthEntity,
+  ): Promise<ContentObject> {
+    return await this.contentRepository.approveUpdateByAdmin(id, user);
+  }
+
+  async approveContentDelete(
+    id: string,
+    user: AuthEntity,
+  ): Promise<ContentObject | string> {
+    return await this.contentRepository.approveContentDelete(id, user);
   }
 }
