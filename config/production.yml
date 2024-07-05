@@ -5,3 +5,6 @@ db:
   port: 5432
   database: "blog_db_bwzk"
   synchronize: false
+
+jwt:
+  secret: "blog001"
