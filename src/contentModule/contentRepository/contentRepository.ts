@@ -216,6 +216,13 @@ export class ContentRepository extends Repository<
     try {
       const content = await this.getContentUser(id, user);
 
+      if(content.name !== name){
+        this.logger.error('you are not authorized to update this content');
+        throw new UnauthorizedException(
+          'you are not authorized to update this content',
+        );
+      }
+
       if (!content) {
         throw new NotFoundException(`Content with id ${id} not found`);
       }
