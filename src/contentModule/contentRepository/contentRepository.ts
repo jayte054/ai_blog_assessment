@@ -100,7 +100,6 @@ export class ContentRepository extends Repository<
   //======get a single content using id========//
 
   getContent = async (id: string): Promise<ApprovedContentEntity> => {
-    console.log(id);
     try {
       const option: FindManyOptions<ApprovedContentEntity> = {
         where: {
@@ -128,7 +127,6 @@ export class ContentRepository extends Repository<
     id: string,
     user: AuthEntity,
   ): Promise<ApprovedContentEntity> => {
-    console.log(id);
     try {
       const option: FindManyOptions<ApprovedContentEntity> = {
         where: {
@@ -230,7 +228,7 @@ export class ContentRepository extends Repository<
           `content with title ${content.title}, successfully deleted by ${name}`,
         );
       } else if (userType === 'user' && isAdmin === false) {
-        content.title = 'REQUEST To Delete';
+        content.title = 'REQUEST To DELETE';
         content.isApproved = false;
         await content.save();
         this.logger.log(`request to delete content has been submitted`);
