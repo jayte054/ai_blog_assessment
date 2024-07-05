@@ -1,2 +1,7 @@
 db:
+  host: "dpg-cq3d6arqf0us73dfq580-a"
+  username: "jayte"
+  password: "KKK8mmQmEAfOBrxdAtBrDWrHS4tmXetJ"
+  port: 5432
+  database: "blog_db_bwzk"
   synchronize: false
