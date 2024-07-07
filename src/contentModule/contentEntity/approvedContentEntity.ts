@@ -21,7 +21,7 @@ export class ApprovedContentEntity extends BaseEntity {
   @Column({ default: new Date() })
   date: string;
 
-  @ManyToOne(() => AuthEntity, (user) => user.titles, { eager: false })
+  @ManyToOne(() => AuthEntity, (user) => user.title, { eager: false })
   user: AuthEntity;
 
   @Column()

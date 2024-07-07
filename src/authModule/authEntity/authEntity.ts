@@ -2,9 +2,10 @@ import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique }
 import * as bcrypt from 'bcryptjs';
 import { ContentEntity } from "src/contentModule/contentEntity/contentEntity";
 import { UserType } from "src/contentModule/contentEnum/contentEnum";
+import { ApprovedContentEntity } from "src/contentModule/contentEntity/approvedContentEntity";
 
 @Entity()
-@Unique(["email"])
+@Unique(['email'])
 export class AuthEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -27,8 +28,11 @@ export class AuthEntity extends BaseEntity {
   @Column()
   userType: UserType;
 
-  @OneToMany(() => ContentEntity, title => title.user, {eager: true})
+  @OneToMany(() => ContentEntity, (title) => title.user, { eager: true })
   titles: [];
+
+  @OneToMany(() => ApprovedContentEntity, (title) => title.user, { eager: true })
+  title: [];
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
