@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { AuthEntity } from "src/authModule/authEntity/authEntity";
-import { ContentObject } from "src/types";
+import { ContentObject, ContentObjectApproved } from "src/types";
 import { DataSource, FindManyOptions, FindOneOptions,  FindOptions,  Repository } from "typeorm";
 import { CreateContentDto, UpdateContentDto } from "../contentDto/contentDto";
 import { ApprovedContentEntity } from "../contentEntity/approvedContentEntity";
@@ -364,7 +364,13 @@ export class ContentRepository extends Repository<
 
     try {
     //   Fetch the content entity by id
-      const content = await ContentEntity.findOne({ where: { id } });
+        const _option: FindManyOptions<ContentEntity> = {
+          where: {
+            id,
+            isApproved: true,
+          },
+        };
+      const content: ContentObjectApproved | any = await this.findOne(_option);
       if (!content) {
         this.logger.error(`Content with id ${id} not found in ContentEntity`);
         throw new NotFoundException('Content not found');
@@ -372,7 +378,7 @@ export class ContentRepository extends Repository<
 
       // Delete content if it is not approved
       if (!content.isApproved) {
-        await ContentEntity.delete({ id });
+        await this.delete(content);
         this.logger.log(`Unapproved content deleted successfully by ${name}`);
       }
 

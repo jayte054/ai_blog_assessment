@@ -22,6 +22,13 @@ export type ContentObject = {
   description: string;
   name: string;
 }
+export type ContentObjectApproved = {
+  id: string;
+  title: string;
+  description: string;
+  name: string;
+  isApproved?: boolean;
+};
 
 export interface ContentInterface{
   id: string;
